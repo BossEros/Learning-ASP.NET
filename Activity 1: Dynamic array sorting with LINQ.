@@ -1,0 +1,60 @@
+using System;
+using System.Linq;
+
+public class HelloWorld
+{
+    public static void Main(string[] args)
+    {
+        int[] numbers = null;
+        while (numbers == null)
+        {
+            Console.WriteLine("Enter integers separated by spaces (e.g., 1 2 3) or 'q' to quit: ");
+            string input = Console.ReadLine();
+
+            if (string.Equals(input, "q", StringComparison.OrdinalIgnoreCase))
+            {
+                Console.WriteLine("Exiting program.");
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(input))
+            {
+                Console.WriteLine("Error: No numbers entered. Please try again.");
+                continue;
+            }
+
+            string[] numberStrings = input.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            if (numberStrings.Length == 0)
+            {
+                Console.WriteLine("Error: No valid numbers entered. Please try again.");
+                continue;
+            }
+
+            try
+            {
+                numbers = numberStrings
+                    .Select((s, i) => new { Value = s, Index = i })
+                    .Select(x => 
+                    {
+                        if (!int.TryParse(x.Value, out int num))
+                            throw new FormatException($"Invalid number '{x.Value}' at position {x.Index + 1}.");
+                        return num;
+                    })
+                    .ToArray();
+            }
+            catch (FormatException ex)
+            {
+                Console.WriteLine($"Error: {ex.Message} Please try again.");
+                continue;
+            }
+            catch (OverflowException)
+            {
+                Console.WriteLine("Error: One or more numbers are too large or too small for an integer. Please try again.");
+                continue;
+            }
+        }
+
+        Console.WriteLine($"Sorted Ascending: {string.Join(", ", numbers.OrderBy(x => x))}");
+        Console.WriteLine($"Sorted Descending: {string.Join(", ", numbers.OrderByDescending(x => x))}");
+    }
+}
